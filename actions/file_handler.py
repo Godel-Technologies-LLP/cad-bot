@@ -74,85 +74,120 @@ class DXFProcessor:
 
     def convert_to_image(
         self,
-        layers=None,
         dpi=300,
         bg_color="white",
         line_color="black",
         padding_factor=0.5,
     ):
-        """Convert a DXF file to an image with only specified layers."""
-        try:
-            available_layers = [layer.dxf.name for layer in self.doc.layers]
-            if layers and "list" in layers:
-                print("Available layers in the DXF file:")
-                for layer in available_layers:
-                    print(f"- {layer}")
-                return False
+        """Convert a DXF file to an image with all layers included."""
 
-            fig = plt.figure(figsize=(10, 10), facecolor=bg_color)
-            ax = fig.add_axes([0, 0, 1, 1])
-            ax.set_aspect("equal")
-            ax.axis("off")
+        fig = plt.figure(figsize=(10, 10), facecolor=bg_color)
+        ax = fig.add_axes([0, 0, 1, 1])
+        ax.set_aspect("equal")
+        ax.axis("off")
 
-            lines = []
-            for e in self.msp:
-                if layers and e.dxf.layer not in layers:
-                    continue
+        lines = []
+        texts = []
+        dim_positions = set()
 
-                if e.dxftype() == "LINE":
-                    lines.append(
-                        [(e.dxf.start[0], e.dxf.start[1]), (e.dxf.end[0], e.dxf.end[1])]
-                    )
-                elif e.dxftype() == "CIRCLE":
-                    center, radius = e.dxf.center, e.dxf.radius
-                    theta = np.linspace(0, 2 * np.pi, 100)
-                    x, y = center[0] + radius * np.cos(theta), center[
-                        1
-                    ] + radius * np.sin(theta)
-                    points = np.column_stack([x, y])
-                    circle_segments = [
+        def add_entity(e, insert_point=(0, 0)):
+            if e.dxftype() == "LINE":
+                lines.append(
+                    [
                         (
-                            (points[i][0], points[i][1]),
-                            (points[i + 1][0], points[i + 1][1]),
-                        )
+                            e.dxf.start.x + insert_point[0],
+                            e.dxf.start.y + insert_point[1],
+                        ),
+                        (e.dxf.end.x + insert_point[0], e.dxf.end.y + insert_point[1]),
+                    ]
+                )
+            elif e.dxftype() in ["CIRCLE", "ARC"]:
+                center = (
+                    e.dxf.center.x + insert_point[0],
+                    e.dxf.center.y + insert_point[1],
+                )
+                radius = e.dxf.radius
+                start_angle = np.radians(getattr(e.dxf, "start_angle", 0))
+                end_angle = np.radians(getattr(e.dxf, "end_angle", 360))
+                theta = np.linspace(start_angle, end_angle, 100)
+                points = np.column_stack(
+                    [
+                        center[0] + radius * np.cos(theta),
+                        center[1] + radius * np.sin(theta),
+                    ]
+                )
+                lines.extend(
+                    [
+                        (tuple(points[i]), tuple(points[i + 1]))
                         for i in range(len(points) - 1)
                     ]
-                    lines.extend(circle_segments)
-                elif e.dxftype() in ["ARC", "POLYLINE", "LWPOLYLINE"]:
-                    points = [(p[0], p[1]) for p in e.points()]
-                    if e.is_closed:
-                        points.append(points[0])
-                    poly_segments = [
-                        (points[i], points[i + 1]) for i in range(len(points) - 1)
+                )
+            elif e.dxftype() in ["POLYLINE", "LWPOLYLINE"]:
+                points = (
+                    [
+                        (p[0] + insert_point[0], p[1] + insert_point[1])
+                        for p in e.get_points()
                     ]
-                    lines.extend(poly_segments)
+                    if hasattr(e, "get_points")
+                    else []
+                )
+                if e.is_closed and points:
+                    points.append(points[0])
+                lines.extend(
+                    [(points[i], points[i + 1]) for i in range(len(points) - 1)]
+                )
+            elif e.dxftype() == "DIMENSION":
+                try:
+                    dim_value = (
+                        round(float(e.get_measurement()), 2)
+                        if hasattr(e, "get_measurement")
+                        else ""
+                    )
+                    pos = (
+                        e.dxf.text_midpoint.x + insert_point[0],
+                        e.dxf.text_midpoint.y + insert_point[1],
+                    )
+                    if dim_value and pos not in dim_positions:
+                        # texts.append((pos[0], pos[1], str(dim_value), "red"))
+                        dim_positions.add(pos)
+                    for entity in e.virtual_entities():
+                        add_entity(entity, insert_point)
+                except Exception:
+                    pass
+            elif e.dxftype() == "MTEXT":
+                texts.append(
+                    (
+                        e.dxf.insert.x + insert_point[0],
+                        e.dxf.insert.y + insert_point[1],
+                        e.dxf.text,
+                        line_color,
+                    )
+                )
+            # elif e.dxftype() == "INSERT":
+            #     process_block(e)
 
-            if lines:
-                ax.add_collection(
-                    LineCollection(lines, colors=line_color, linewidths=0.5)
-                )
-                all_points = np.array([point for line in lines for point in line])
-                if all_points.any():
-                    min_x, min_y = np.min(all_points, axis=0)
-                    max_x, max_y = np.max(all_points, axis=0)
-                    width, height = max_x - min_x, max_y - min_y
-                    center_x, center_y = (min_x + max_x) / 2, (min_y + max_y) / 2
-                    max_dim = max(width, height) * (1 + padding_factor * 2)
-                    ax.set_xlim(center_x - max_dim / 2, center_x + max_dim / 2)
-                    ax.set_ylim(center_y - max_dim / 2, center_y + max_dim / 2)
-                plt.savefig(
-                    "./files/moved_room.png",
-                    dpi=dpi,
-                    bbox_inches="tight",
-                    pad_inches=0.5,
-                )
-                plt.close()
-                print(f"DXF converted to image: {'./files/moved_room.png'}")
-                return True
-            else:
-                print("No entities found in the specified layers.")
-                plt.close()
-                return False
-        except Exception as e:
-            print(f"Error converting DXF to image: {str(e)}")
-            return False
+        def process_block(insert_entity):
+            block_name = insert_entity.dxf.name
+            insert_point = (insert_entity.dxf.insert.x, insert_entity.dxf.insert.y)
+            block = self.doc.blocks.get(block_name)
+            if not block:
+                return
+            for entity in block:
+                add_entity(entity, insert_point)
+
+        for e in self.msp:
+            add_entity(e, insert_point=(0, 0))
+
+        if lines:
+            ax.add_collection(LineCollection(lines, colors=line_color, linewidths=0.5))
+            all_points = np.array([pt for line in lines for pt in line])
+            min_x, min_y = np.min(all_points, axis=0)
+            max_x, max_y = np.max(all_points, axis=0)
+            margin_x, margin_y = (max_x - min_x) * 0.05, (max_y - min_y) * 0.05
+            ax.set_xlim(min_x - margin_x, max_x + margin_x)
+            ax.set_ylim(min_y - margin_y, max_y + margin_y)
+
+        for x, y, text, color in texts:
+            ax.text(x, y, text, fontsize=6, color=color, ha="center", va="center")
+
+        plt.savefig("./files/output.png", dpi=dpi, bbox_inches="tight", pad_inches=0.1)

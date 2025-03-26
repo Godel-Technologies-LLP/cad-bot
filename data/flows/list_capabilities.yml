@@ -1,0 +1,6 @@
+flows:
+  list_capabilities:
+    description: List down the capabilities of the bot
+    steps:
+      - action: utter_list_capabilities
+      

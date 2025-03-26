@@ -1,0 +1,11 @@
+flows:
+  display_control:
+    description: Toggle portions of the display on or off
+    steps:
+      - collect: layer_to_toggle
+        description: Name of the layer to toggle
+      - collect: end_state_of_layer
+        description: on or off the layer
+
+      
+      

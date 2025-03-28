@@ -29,7 +29,10 @@ class ActionMoveObjects(Action):
         dxf_processor = DXFProcessor()
         dxf_processor.move_objects(object, distance)
         dxf_processor.save("./files/restroom_modified.dxf")
-        # image = dxf_processor.convert_to_image()
-        dispatcher.utter_message(text=f"Here is the modified position of the {object}")
+        dxf_processor.convert_to_image()
+        dispatcher.utter_message(
+            text=f"Here is the modified position of the {object}",
+            image="./files/output.png",
+        )
 
         return []

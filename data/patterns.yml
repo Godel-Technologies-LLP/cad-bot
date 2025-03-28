@@ -4,15 +4,19 @@ flows:
     name: pattern chitchat
     steps:
       - action: utter_free_chitchat_response
+ 
   pattern_search:
     description: Flow for handling knowledge-based questions
     name: pattern search
     steps:
       - action: utter_free_chitchat_response
-  # pattern_session_start:
-  #   description: Flow for starting the conversation
-  #   name: pattern session start   
-  #   nlu_trigger:
-  #     - intent: session_start
-  #   steps:
-  #     - link: move_objects
+ 
+  pattern_session_start:
+    description: Flow for starting the conversation
+    name: pattern session start   
+    nlu_trigger:
+      - intent: session_start
+    steps:
+      - action: utter_greet_user
+      - action: action_show_image
+      - action: utter_inform_capabilities

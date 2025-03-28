@@ -7,21 +7,8 @@ from matplotlib.collections import LineCollection
 from typing import List, Tuple
 
 
-class DXFProcessor:
-    """Handles DXF file operations, in-memory caching, and image conversion."""
-
-    _instance = None
-
-    def __new__(cls, file_path="./files/restroom.dxf"):
-        """Ensure only one instance exists per DXF file."""
-        if cls._instance is None or cls._instance.file_path != file_path:
-            cls._instance = super(DXFProcessor, cls).__new__(cls)
-            cls._instance._initialize(file_path)
-        return cls._instance
-
-    def _initialize(self, file_path: str):
-        """Load DXF file into memory once."""
-        self.file_path = file_path
+class DataProcessor:
+    def __init__(self, file_path="./files/restroom.dxf"):
         self.doc = ezdxf.readfile(file_path)
         self.msp = self.doc.modelspace()
 

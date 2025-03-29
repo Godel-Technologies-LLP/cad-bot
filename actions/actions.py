@@ -4,6 +4,8 @@ from rasa_sdk.executor import CollectingDispatcher
 import requests
 from rasa_sdk.events import SlotSet
 from requests.exceptions import RequestException
+import random
+import string
 
 
 class ActionShowImage(Action):
@@ -35,7 +37,8 @@ class ActionShowImage(Action):
 
             dispatcher.utter_message(
                 text="Here's the floorplan image:",
-                image="https://archcad.s3.ap-south-1.amazonaws.com/floorplan.png",
+                image="https://archcad.s3.ap-south-1.amazonaws.com/floorplan.png?"
+                + generate_random_string(5),
             )
 
         except RequestException as e:
@@ -86,3 +89,13 @@ class ActionToggleLayer(Action):
                 text="Failed to toggle layer display.",
             )
         return []
+
+
+def generate_random_string(length):
+    # Define the characters to choose from
+    characters = string.ascii_letters
+
+    # Generate the random string
+    random_string = "".join(random.choice(characters) for _ in range(length))
+
+    return random_string

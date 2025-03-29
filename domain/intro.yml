@@ -1,9 +1,0 @@
-responses:
-   utter_greet_user: 
-      - text: "Welcome to Archbot!\nWe will help you make faster iterations and design changes to  your 2D archicture.\nLoading your design...\n\n"
-   utter_inform_capabilities: 
-      - text: "Archbot can do the following:\n
-               1. Move an object in the drawing to a new position\n
-               2. Toggle the visibility of an object in the drawing\n
-               
-

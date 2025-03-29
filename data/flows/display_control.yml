@@ -1,11 +1,17 @@
-# flows:
-#   display_control:
-#     description: Toggle portions of the display on or off
-#     steps:
-#       - collect: layer_to_toggle
-#         description: Name of the layer to toggle
-#       - collect: end_state_of_layer
-#         description: on or off the layer
+flows:
+  toggle_display:
+    description: Toggle portions of the display on or off
+    steps:
+      - collect: layer
+        description: Name of the layer to toggle
+      - collect: end_state
+        description: on or off the layer
+      - action: action_toggle_layer
+      - action: action_show_image
 
-      
+  
+  show_image:
+    description: Show the drawing when the user demands
+    steps:
+      - action: action_show_image        
       

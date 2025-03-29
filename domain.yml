@@ -1,11 +1,14 @@
 version: "3.1"
 
-# slots:
-#   data_processor:
-#     type: any  
-#     mappings:
-#       - type: controlled
-          
+slots:
+  layer:
+      type: text
+      mappings:
+         - type: from_llm
+  end_state:
+      type: bool
+      mappings:
+         - type: from_llm
 #   object:
 #     type: text
 #     mappings:
@@ -42,6 +45,7 @@ version: "3.1"
 #   - action_move_object
 actions:
  - action_show_image
+ - action_toggle_layer
 
 responses:
    utter_greet_user: 
@@ -54,3 +58,8 @@ responses:
                1. Move an object in the drawing to a new position\n
                2. Toggle the visibility of an object in the drawing\n"
                
+   utter_ask_layer:
+      - text: "What layer do you want to edit?"
+   
+   utter_ask_end_state:
+      - text: "Do you want to turn it on or off?"

@@ -9,5 +9,12 @@ pipeline:
 
 policies:
 - name: FlowPolicy
-#  - name: EnterpriseSearchPolicy
+# - name: EnterpriseSearchPolicy
+#   llm:  # The model for response generation
+#     model_group: enterprise_search_generation
+#   embeddings: # The model for your embeddings
+#     model_group: enterprise_search_embeddings
+#   vector_store:
+#     type: "faiss"
+#     source: "./docs"
 assistant_id: 20250326-071400-icy-school

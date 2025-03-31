@@ -4,3 +4,4 @@ __pycache__/
 models/
 .rasa
 .vscode
+db

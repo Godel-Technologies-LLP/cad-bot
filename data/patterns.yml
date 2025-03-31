@@ -19,4 +19,4 @@ flows:
     steps:
       - action: utter_greet_user
       - action: action_show_image
-      - action: utter_inform_capabilities
+      - action: utter_inform_capabilities  

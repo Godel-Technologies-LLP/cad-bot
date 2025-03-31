@@ -6,6 +6,7 @@ from rasa_sdk.events import SlotSet
 from requests.exceptions import RequestException
 import random
 import string
+from actions.query_db import get_layer_name
 
 
 class ActionShowImage(Action):
@@ -65,6 +66,7 @@ class ActionToggleLayer(Action):
     ) -> List[Dict[Text, Any]]:
         layer = tracker.get_slot("layer")
         end_state = tracker.get_slot("end_state")
+        layer = get_layer_name(layer)
         response = requests.request(
             "GET",
             f"http://localhost:8080/api/render/info",

@@ -7,7 +7,6 @@ flows:
       - collect: end_state
         description: on or off the layer
       - action: action_toggle_layer
-      - action: action_show_image
 
   
   show_image:

@@ -129,47 +129,12 @@ class ActionToggleLayer(Action):
         domain: Dict[Text, Any],
     ) -> List[Dict[Text, Any]]:
         # Get and validate slots
-        layer = tracker.get_slot("layer")
+        raw_layer = tracker.get_slot("layer")
         end_state = tracker.get_slot("end_state")
 
-        layer = get_layer_name(layer)
+        layer = get_layer_name(raw_layer)
 
-        # Step 1: Get initial layer info
-        # try:
-        #     info_response = requests.request(
-        #         "GET",
-        #         "http://localhost:8080/api/render/info",
-        #         params={"layer_name": layer},
-        #         timeout=10,
-        #     )
-        #     info_response.raise_for_status()
-        #     logger.info(f"Successfully retrieved initial info for layer {layer}")
-        # except ConnectionError:
-        #     logger.error(f"Connection error when getting info for layer {layer}")
-        #     dispatcher.utter_message(
-        #         text="I couldn't connect to the design server. Please check if it's running."
-        #     )
-        #     return []
-        # except Timeout:
-        #     logger.error(f"Timeout when getting info for layer {layer}")
-        #     dispatcher.utter_message(
-        #         text="The request to the design server timed out. Please try again later."
-        #     )
-        #     return []
-        # except HTTPError as e:
-        #     logger.error(f"HTTP error when getting info for layer {layer}: {str(e)}")
-        #     dispatcher.utter_message(
-        #         text=f"There was a problem retrieving layer information: {e.response.status_code}"
-        #     )
-        #     return []
-        # except Exception as e:
-        #     logger.error(
-        #         f"Unexpected error when getting info for layer {layer}: {str(e)}"
-        #     )
-        #     dispatcher.utter_message(
-        #         text=f"Failed to get information about layer '{layer}'. {str(e)}"
-        #     )
-        #     return []
+        print(f"Raw layer: {raw_layer} mapped to design naming convention: {layer}")
 
         # Step 2: Toggle the layer
         try:
@@ -392,7 +357,7 @@ class ActionListObjects(Action):
                 dispatcher.utter_message(text="There are no objects that can be moved.")
 
             if immovable_layers:
-                immovable_text = ", ".join(immovable_layers)
+                immovable_text = ", \n".join(immovable_layers)
                 dispatcher.utter_message(
                     text=f"Objects that cannot be moved: {immovable_text}"
                 )

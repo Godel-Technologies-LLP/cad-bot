@@ -7,7 +7,7 @@ Make edits to your 2D drawing via a conversational interface
 2. pip install flask
 3. pip install ezdxf
 ## Run ARCHCAD core
-`cd archCAD
+`cd archCAD;
 python app.py`
 
 ## Run Rasa
